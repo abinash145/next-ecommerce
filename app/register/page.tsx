@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+
 import { signIn } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function RegisterPage() {
     try {
       event.preventDefault();
       const formData = new FormData(event.currentTarget);
+      console.log("formData", formData, event, Object.fromEntries(formData));
       const signInResult = await signIn("credentials", {
         ...Object.fromEntries(formData),
         redirect: false,

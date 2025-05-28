@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(request: Request) {
-  console.log("request", request);
   const url = new URL(request.url);
   const page = parseInt(url.searchParams.get("page") || "1");
   const postsPerPage = 5;
