@@ -1,7 +1,8 @@
-import CredentialsProvider from "next-auth/providers/credentials";
-import { type NextAuthOptions } from "next-auth";
-import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { type NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+
+import prisma from "@/lib/prisma";
 
 export const authOptions = {
   providers: [
@@ -16,19 +17,19 @@ export const authOptions = {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Invalid credentials");
         }
-
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: credentials.email, id: "" },
         });
-
         if (!user) {
-          return await prisma.user.create({
-            data: {
-              name: credentials.name ?? credentials.email,
-              email: credentials.email,
-              password: await bcrypt.hash(credentials.password, 10),
-            },
-          });
+          console.log("No user found with this email");
+          throw new Error("No user found with this email");
+          // return await prisma.user.create({
+          //   data: {
+          //     name: credentials.name ?? credentials.email,
+          //     email: credentials.email,
+          //     password: await bcrypt.hash(credentials.password, 10),
+          //   },
+          // });
         }
 
         const isCorrectPassword = await bcrypt.compare(

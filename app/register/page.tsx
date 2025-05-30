@@ -2,31 +2,39 @@
 
 import { useState } from "react";
 
-import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     try {
       event.preventDefault();
       const formData = new FormData(event.currentTarget);
-      console.log("formData", formData, event, Object.fromEntries(formData));
-      const signInResult = await signIn("credentials", {
-        ...Object.fromEntries(formData),
-        redirect: false,
+      // console.log("formData", formData, event, Object.fromEntries(formData));
+      // const signInResult = await signIn("credentials", {
+      //   ...Object.fromEntries(formData),
+      //   redirect: false,
+      // });
+      // console.log("signInResult", signInResult);
+      // if (signInResult?.error) {
+      //   setError("Failed to sign in after registration");
+      //   return;
+      // }
+      console.log(
+        "Object.fromEntries(formData)",
+        Object.fromEntries(formData),
+        formData
+      );
+      // const user = await registerUser(Object.fromEntries(formData));
+      // console.log("Registered user:", user);
+      // router.push("/");
+      // router.refresh();
+      await fetch(`/api/user`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.fromEntries(formData)),
       });
-
-      if (signInResult?.error) {
-        setError("Failed to sign in after registration");
-        return;
-      }
-
-      router.push("/");
-      router.refresh();
     } catch (error) {
       setError(error instanceof Error ? error.message : "Registration failed");
     }
