@@ -17,19 +17,12 @@ export const authOptions = {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Invalid credentials");
         }
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email, id: "" },
+        const user = await prisma.user.findFirst({
+          where: { email: credentials.email },
         });
+
         if (!user) {
-          console.log("No user found with this email");
           throw new Error("No user found with this email");
-          // return await prisma.user.create({
-          //   data: {
-          //     name: credentials.name ?? credentials.email,
-          //     email: credentials.email,
-          //     password: await bcrypt.hash(credentials.password, 10),
-          //   },
-          // });
         }
 
         const isCorrectPassword = await bcrypt.compare(

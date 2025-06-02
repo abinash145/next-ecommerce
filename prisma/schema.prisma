@@ -16,12 +16,13 @@ datasource db {
 model User {
   id       String  @id @default(cuid())
   name     String?
-  email    String
+  email    String @unique
   password String
   posts    Post[]
   orders    Order[]
   designs   Design[]
   createdAt DateTime @default(now())
+  gender    Gender?
 }
 
 model Post {
@@ -42,14 +43,24 @@ model Product {
   price       Float
   images      String[]
   variations  Variation[]
-    orderItems OrderItem[]
-      categories   ProductCategory[] 
+  orderItems OrderItem[]
+  categories   ProductCategory[] 
+  brandId     String?
+  brand       Brand?       @relation(fields: [id], references: [id])
   createdAt   DateTime     @default(now())
+}
+enum Size {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
 }
 
 model Variation {
   id        String   @id @default(uuid())
-  size      String
+  size      Size
   color     String
   stock     Int
   product   Product  @relation(fields: [productId], references: [id])
@@ -97,4 +108,19 @@ model Design {
   designUrl  String   // Link to file (Cloudinary or S3)
   editable   Boolean
   createdAt  DateTime @default(now())
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+model Brand {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  logoUrl   String?   // Optional brand logo
+  products  Product[]
+   createdAt  DateTime @default(now())
+
 }
