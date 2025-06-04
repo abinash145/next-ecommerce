@@ -103,3 +103,24 @@ export async function PUT(
     );
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
+
+  try {
+    const deletedBrand = await prisma.brand.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true, data: deletedBrand });
+  } catch (error) {
+    console.error("Delete brand error:", error);
+    return NextResponse.json(
+      { success: false, message: "Brand not found or error deleting" },
+      { status: 500 }
+    );
+  }
+}

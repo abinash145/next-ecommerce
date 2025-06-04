@@ -1,10 +1,14 @@
 // app/layout.tsx
 import "./globals.css";
-import Header from "./Header";
+
+import { Toaster } from "react-hot-toast";
+
+import { AppContextProvider } from "@/context/AppContext";
+
 import Providers from "./providers";
 
 export const metadata = {
-  title: "Superblog",
+  title: "E App",
   description: "A blog app using Next.js and Prisma",
 };
 
@@ -18,8 +22,12 @@ export default function RootLayout({
       <body>
         <Providers>
           <div className="min-h-screen flex flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
+            {/* <Header /> */}
+
+            <Toaster />
+            <AppContextProvider>
+              <main className="flex-1">{children}</main>
+            </AppContextProvider>
           </div>
         </Providers>
       </body>

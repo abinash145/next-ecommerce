@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Edit } from "lucide-react";
+import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -30,19 +30,37 @@ export default function BrandTable() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  const fetchBrands = async () => {
+    setLoading(true);
+    const res = await fetch(`/api/brand?page=${page}`);
+    const data = await res.json();
+    setBrands(data.brands);
+    setTotalPages(data.totalPages);
+    setLoading(false);
+  };
   useEffect(() => {
-    const fetchBrands = async () => {
-      setLoading(true);
-      const res = await fetch(`/api/brand?page=${page}`);
-      const data = await res.json();
-      setBrands(data.brands);
-      setTotalPages(data.totalPages);
-      setLoading(false);
-    };
-
     fetchBrands();
   }, [page]);
+  const handleDeleteBrand = async (id: string) => {
+    try {
+      const res = await fetch(`/api/brand/${id}`, {
+        method: "DELETE",
+      });
 
+      const result = await res.json();
+
+      if (result.success) {
+        alert("Brand deleted successfully!");
+        fetchBrands();
+        // optionally, re-fetch the list or update state
+      } else {
+        alert("Failed to delete brand.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting brand");
+    }
+  };
   return (
     <Card className="p-4">
       <div className="flex justify-between">
@@ -83,9 +101,12 @@ export default function BrandTable() {
                   {new Date(brand.createdAt).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
-                  <Link href={`/dashboard/brand/${brand.id}`}>
-                    <Edit />
-                  </Link>
+                  <div className="flex gap-4 items-center">
+                    <Link href={`/dashboard/brand/${brand.id}`}>
+                      <Edit />
+                    </Link>
+                    <Trash onClick={() => handleDeleteBrand(brand.id)} />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
