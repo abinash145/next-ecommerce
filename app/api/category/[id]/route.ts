@@ -11,27 +11,29 @@ export async function GET(
 
   if (!id) {
     return NextResponse.json(
-      { error: "Brand ID is required" },
+      { error: "Category ID is required" },
       { status: 400 }
     );
   }
 
   try {
-    const brand = await prisma.brand.findUnique({
+    const category = await prisma.category.findUnique({
       where: { id },
       select: {
         id: true,
         name: true,
-        logoUrl: true,
-        // products: true,
+        products: true,
       },
     });
 
-    if (!brand) {
-      return NextResponse.json({ error: "Brand not found" }, { status: 404 });
+    if (!category) {
+      return NextResponse.json(
+        { error: "Category not found" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json(brand);
+    return NextResponse.json(category);
   } catch (error) {
     console.error("GET /user/[id] error:", error);
     return NextResponse.json(
@@ -49,54 +51,51 @@ export async function PUT(
 
   if (!id) {
     return NextResponse.json(
-      { error: "Brand ID is required" },
+      { error: "Category ID is required" },
       { status: 400 }
     );
   }
 
   try {
-    const { name, logoUrl } = await request.json();
+    const { name } = await request.json();
 
-    // Check if the brand with the given ID exists
-    const existingBrand = await prisma.brand.findUnique({
+    // Check if the category with the given ID exists
+    const existingCategory = await prisma.category.findUnique({
       where: { id },
     });
 
-    if (!existingBrand) {
+    if (!existingCategory) {
       return NextResponse.json(
-        { error: "Brand does not exist with this ID." },
+        { error: "Category does not exist with this ID." },
         { status: 404 }
       );
     }
 
     // Optional: Prevent duplicate names
-    if (name && name !== existingBrand.name) {
-      const duplicate = await prisma.brand.findFirst({ where: { name } });
+    if (name && name !== existingCategory.name) {
+      const duplicate = await prisma.category.findFirst({ where: { name } });
       if (duplicate) {
         return NextResponse.json(
-          { error: "Brand name already exists." },
+          { error: "Category name already exists." },
           { status: 400 }
         );
       }
     }
 
-    const updated = await prisma.brand.update({
+    const updated = await prisma.category.update({
       where: { id },
       data: {
-        name: name ?? existingBrand.name,
-        logoUrl: logoUrl ?? existingBrand.logoUrl,
+        name: name ?? existingCategory.name,
       },
       select: {
         id: true,
         name: true,
-        logoUrl: true,
-        createdAt: true,
       },
     });
 
     return NextResponse.json(updated, { status: 200 });
   } catch (error) {
-    console.error("Brand update error:", error);
+    console.error("Category update error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -111,15 +110,15 @@ export async function DELETE(
   const { id } = params;
 
   try {
-    const deletedBrand = await prisma.brand.delete({
+    const deletedCategory = await prisma.category.delete({
       where: { id },
     });
 
-    return NextResponse.json({ success: true, data: deletedBrand });
+    return NextResponse.json({ success: true, data: deletedCategory });
   } catch (error) {
-    console.error("Delete brand error:", error);
+    console.error("Delete category error:", error);
     return NextResponse.json(
-      { success: false, message: "Brand not found or error deleting" },
+      { success: false, message: "Category not found or error deleting" },
       { status: 500 }
     );
   }

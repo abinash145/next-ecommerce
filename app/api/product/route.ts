@@ -1,33 +1,64 @@
 import { NextResponse } from "next/server";
 
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/prisma"; // Update import based on your setup
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const page = parseInt(url.searchParams.get("page") || "1");
-  const postsPerPage = 5;
-  const offset = (page - 1) * postsPerPage;
+export async function POST(req: Request) {
+  try {
+    const {
+      name,
+      description,
+      price,
+      offerPrice,
+      images,
+      brandId,
+      categoryIds,
+      variations,
+    } = await req.json();
 
-  // Fetch paginated posts
-  const posts = await prisma.product.findMany({
-    skip: offset,
-    take: postsPerPage,
-    orderBy: { createdAt: "desc" },
-    include: {
-      categories: {
-        select: {
-          category: true,
-          product: true,
-          id: true,
-          categoryId: true,
-          productId: true,
+    // 1. Create Product with optional brand and variations
+    const product = await prisma.product.create({
+      data: {
+        name,
+        description,
+        price,
+        offerPrice,
+        images,
+        brand: brandId ? { connect: { id: brandId } } : undefined,
+        variations: {
+          create: variations || [],
         },
       },
-    },
-  });
+    });
 
-  const totalPosts = await prisma.post.count();
-  const totalPages = Math.ceil(totalPosts / postsPerPage);
+    // 2. Create ProductCategory entries
+    if (categoryIds && categoryIds.length > 0) {
+      await prisma.productCategory.createMany({
+        data: categoryIds.map((categoryId: string) => ({
+          productId: product.id,
+          categoryId,
+        })),
+      });
+    }
+    // 3. Refetch full product with related data
+    const fullProduct = await prisma.product.findUnique({
+      where: { id: product.id },
+    });
 
-  return NextResponse.json({ posts, totalPages });
+    return NextResponse.json(fullProduct, { status: 201 });
+  } catch (error) {
+    console.error("Error creating product:", error);
+    return NextResponse.json({ error: "Create failed" }, { status: 500 });
+  }
+}
+
+export async function GET() {
+  try {
+    // Read all products and join ProductCategory → Category
+    const products = await prisma.product.findMany();
+
+    return NextResponse.json(products);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return NextResponse.json({ error: "Fetch failed" }, { status: 500 });
+  }
 }

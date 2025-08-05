@@ -14,11 +14,11 @@ datasource db {
 }
 
 model User {
-  id       String  @id @default(cuid())
-  name     String?
-  email    String @unique
-  password String
-  posts    Post[]
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  posts     Post[]
   orders    Order[]
   designs   Design[]
   createdAt DateTime @default(now())
@@ -37,18 +37,20 @@ model Post {
 }
 
 model Product {
-  id          String       @id @default(uuid())
-  title       String
-  description String
-  price       Float
-  images      String[]
-  variations  Variation[]
-  orderItems OrderItem[]
-  categories   ProductCategory[] 
-  brandId     String?
-  brand       Brand?       @relation(fields: [id], references: [id])
-  createdAt   DateTime     @default(now())
+  id                String            @id @default(uuid())
+  name              String
+  description       String
+  price             Float
+  images            String[]
+  variations        Variation[]
+  orderItems        OrderItem[]
+  offerPrice        Float
+  brand             Brand?            @relation(fields: [brandId], references: [id])
+  brandId           String?
+  createdAt         DateTime          @default(now())
+  productCategories ProductCategory[]
 }
+
 enum Size {
   XS
   S
@@ -59,28 +61,28 @@ enum Size {
 }
 
 model Variation {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   size      Size
   color     String
   stock     Int
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
   productId String
 }
 
-
 model Category {
-  id       String           @id @default(uuid())
+  id       String            @id @default(cuid())
   name     String
   products ProductCategory[]
 }
 
 model ProductCategory {
   id         String   @id @default(uuid())
-  product    Product  @relation(fields: [productId], references: [id])
   productId  String
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String
+  Product    Product  @relation(fields: [productId], references: [id])
 }
+
 model Order {
   id        String      @id @default(uuid())
   user      User        @relation(fields: [userId], references: [id])
@@ -92,22 +94,22 @@ model Order {
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
-  product   Product  @relation(fields: [productId], references: [id])
+  id        String  @id @default(uuid())
+  product   Product @relation(fields: [productId], references: [id])
   productId String
-  order     Order    @relation(fields: [orderId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id])
   orderId   String
   quantity  Int
   price     Float
 }
 
 model Design {
-  id         String   @id @default(uuid())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-  designUrl  String   // Link to file (Cloudinary or S3)
-  editable   Boolean
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  designUrl String // Link to file (Cloudinary or S3)
+  editable  Boolean
+  createdAt DateTime @default(now())
 }
 
 enum Gender {
@@ -116,11 +118,11 @@ enum Gender {
   OTHER
   PREFER_NOT_TO_SAY
 }
+
 model Brand {
   id        String    @id @default(uuid())
   name      String    @unique
-  logoUrl   String?   // Optional brand logo
+  logoUrl   String? // Optional brand logo
   products  Product[]
-   createdAt  DateTime @default(now())
-
+  createdAt DateTime  @default(now())
 }

@@ -1,31 +1,57 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import prisma from "@/lib/prisma";
+import { withPagination } from "@/lib/utils/api/withPagination";
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const page = parseInt(url.searchParams.get("page") || "1");
-  const postsPerPage = 5;
-  const offset = (page - 1) * postsPerPage;
+// export async function GET(request: Request) {
+//   // const url = new URL(request.url);
+//   // const page = parseInt(url.searchParams.get("page") || "1");
+//   // const postsPerPage = 5;
+//   // const offset = (page - 1) * postsPerPage;
 
-  // Fetch paginated posts
-  const brands = await prisma.brand.findMany({
-    skip: offset,
-    take: postsPerPage,
-    orderBy: { createdAt: "desc" },
+//   // Fetch paginated posts
+//   // const brands = await prisma.brand.findMany({
+//   //   skip: offset,
+//   //   take: postsPerPage,
+//   //   orderBy: { createdAt: "desc" },
+//   //   select: {
+//   //     id: true,
+//   //     name: true,
+//   //     createdAt: true,
+//   //     logoUrl: true,
+//   //   },
+//   // });
+
+//   const totalPosts = await prisma.brand.count();
+//   const totalPages = Math.ceil(totalPosts / postsPerPage);
+
+//    const result = await paginateAndSearch({
+//     model: prisma.brand,
+//     select: {
+//       id: true,
+//       name: true,
+//       createdAt: true,
+//       logoUrl: true,
+//     },
+//     url: request.url,
+
+//   });
+//   return NextResponse.json(result);
+// }
+// app/api/brands/route.ts
+
+export const GET = (req: NextRequest) =>
+  withPagination({
+    model: prisma.brand,
+    searchField: "name",
     select: {
       id: true,
       name: true,
       createdAt: true,
       logoUrl: true,
     },
+    req,
   });
-
-  const totalPosts = await prisma.brand.count();
-  const totalPages = Math.ceil(totalPosts / postsPerPage);
-
-  return NextResponse.json({ brands, totalPages });
-}
 
 export async function POST(request: Request) {
   try {
@@ -55,14 +81,10 @@ export async function POST(request: Request) {
         name: name,
         logoUrl,
       },
-      select: {
-        id: true,
-        name: true,
-        logoUrl: true,
-        createdAt: true,
-      },
     });
 
+    //respone handler
+    // error handler
     return NextResponse.json(newBrand, { status: 201 });
   } catch (error) {
     console.error("Brand creation error:", error);
